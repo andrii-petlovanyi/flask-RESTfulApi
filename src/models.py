@@ -4,7 +4,6 @@ from src import db
 
 
 class Film(db.Model):
-
     __tablename__ = 'films'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -37,4 +36,29 @@ class Film(db.Model):
             'description': self.description,
             'length': self.length,
             'rating': self.rating,
+        }
+
+
+class Actor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(36), unique=True)
+    name = db.Column(db.String(30), unique=True, nullable=False)
+    birthday = db.Column(db.Date, index=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def __init__(self, name, birthday, is_active):
+        self.uuid = str(uuid.uuid4())
+        self.name = name
+        self.birthday = birthday
+        self.is_active = is_active
+
+    def __repr__(self):
+        return f'Actor({self.name}, {self.birthday}, {self.uuid}, {self.is_active})'
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'uuid': self.uuid,
+            'birthday': self.birthday.strftime('%Y-%m-%d'),
+            'is_active': self.is_active,
         }

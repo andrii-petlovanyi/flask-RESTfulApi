@@ -3,7 +3,7 @@ from flask import request
 from flask_restful import Resource
 
 from src import api, db
-from src.models import Film
+from src.models import Film, Actor
 
 
 class FilmListApi(Resource):
@@ -101,6 +101,62 @@ class FilmListApi(Resource):
         return f'Film with id {uuid} deleted successfully', 204
 
 
+class ActorListApi(Resource):
+    def get(self, uuid=None):
+        if not uuid:
+            actors = db.session.query(Actor).all()
+            return [f.to_dict() for f in actors], 200
+        actor = db.session.query(Actor).filter_by(uuid=uuid).first()
+        if not actor:
+            return f'Sorry, but actor with id: {uuid} not found', 404
+        return actor.to_dict(), 200
+
+    def post(self):
+        actor_json = request.json
+        if not actor_json:
+            return {'message': 'Request data is empty'}, 400
+        try:
+            actor = Actor(
+                name=actor_json['name'],
+                birthday=datetime.datetime.strptime(actor_json['birthday'], '%B %d, %Y'),
+                is_active=actor_json['is_active']
+            )
+            db.session.add(actor)
+            db.session.commit()
+        except (ValueError, KeyError):
+            return {'message': 'Wrong request data'}, 400
+        return {'message': 'Actor added successfully', 'uuid': actor.uuid}, 201
+
+    def put(self, uuid):
+        if not uuid:
+            return {'message': 'Please send id actor'}, 400
+        actor_json = request.json
+        if not actor_json:
+            return {'message': 'Request data is empty'}, 400
+        try:
+            db.session.query(Actor).filter_by(uuid=uuid).update(
+                dict(
+                    name=actor_json['name'],
+                    birthday=datetime.datetime.strptime(actor_json['birthday'], '%B %d, %Y'),
+                    is_active=actor_json['is_active']
+                )
+            )
+            db.session.commit()
+        except (ValueError, KeyError):
+            return {'message': 'Wrong request data'}, 400
+        return {'message': f'Actor with id: {uuid} updated successfully'}, 200
+
+    def delete(self, uuid):
+        if not uuid:
+            return {'message': 'Please send id actor'}, 400
+        actor = db.session.query(Actor).filter_by(uuid=uuid).first()
+        if not actor:
+            return f'Sorry, but actor with id {uuid} not found', 404
+        db.session.delete(actor)
+        db.session.commit()
+        return f'Actor with id {uuid} deleted successfully', 204
+
+
 class Hello(Resource):
     def get(self):
         return {'message': 'Hello, Andrii'}, 200
@@ -108,3 +164,4 @@ class Hello(Resource):
 
 api.add_resource(Hello, '/')
 api.add_resource(FilmListApi, '/films', '/films/<uuid>', strict_slashes=False)
+api.add_resource(ActorListApi, '/actors', '/actors/<uuid>', strict_slashes=False)
