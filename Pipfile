@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 flask-restful = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+uuid = "*"
+flask-swagger-ui = "*"
 
 [dev-packages]
 
