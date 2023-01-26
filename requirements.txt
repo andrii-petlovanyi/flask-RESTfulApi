@@ -1,0 +1,5 @@
+uuid~=1.30
+Flask~=2.2.2
+marshmallow~=3.19.0
+alembic~=1.9.2
+SQLAlchemy~=1.4.46

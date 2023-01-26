@@ -9,6 +9,8 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 uuid = "*"
 flask-swagger-ui = "*"
+marshmallow-sqlalchemy = "*"
+marshmallow = "==3.19.0"
 
 [dev-packages]
 
