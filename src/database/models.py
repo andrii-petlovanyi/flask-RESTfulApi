@@ -66,4 +66,4 @@ class User(db.Model):
         self.password = password
 
     def __repr__(self):
-        return f'Actor({self.name}, {self.birthday}, {self.uuid}, {self.is_active})'
+        return f'User({self.name}, {self.birthday}, {self.uuid}, {self.is_active})'
