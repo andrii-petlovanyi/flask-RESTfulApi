@@ -3,26 +3,30 @@ from flask_restful import Resource
 
 from flask import request
 from marshmallow import ValidationError
+from sqlalchemy.orm import joinedload
 
 from src import db
 from src.database.models import Film
+from src.resources.auth import token_required
 from src.schemas.films import FilmSchema
 
 
 class FilmListApi(Resource):
     film_schema = FilmSchema()
 
+    @token_required
     def get(self, uuid=None):
         if not uuid:
-            films = db.session.query(Film).all()
+            films = db.session.query(Film).options(
+                joinedload(Film.actors)
+            ).all()
             return self.film_schema.dump(films, many=True), 200
-            # return [f.to_dict() for f in films], 200
         film = db.session.query(Film).filter_by(uuid=uuid).first()
         if not film:
             return f'Sorry, but film with id: {uuid} not found', 404
         return self.film_schema.dump(film), 200
-        # return film.to_dict(), 200
 
+    @token_required
     def post(self):
         try:
             film = self.film_schema.load(request.json, session=db.session)
@@ -32,6 +36,7 @@ class FilmListApi(Resource):
         db.session.commit()
         return self.film_schema.dump(film), 201
 
+    @token_required
     def put(self, uuid=None):
         film = db.session.query(Film).filter_by(uuid=uuid).first()
         if not film:
@@ -44,6 +49,8 @@ class FilmListApi(Resource):
         db.session.commit()
         return self.film_schema.dump(film), 200
 
+    # TODO: added Marshmallow validations
+    @token_required
     def patch(self, uuid=None):
         if not uuid:
             return {'message': 'Please send id film'}, 400
@@ -77,6 +84,7 @@ class FilmListApi(Resource):
         db.session.commit()
         return {'message': f'Film with id: {uuid} updated successfully'}, 200
 
+    @token_required
     def delete(self, uuid=None):
         if not uuid:
             return {'message': 'Please send id film'}, 400

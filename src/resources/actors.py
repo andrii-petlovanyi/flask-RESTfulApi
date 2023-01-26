@@ -6,12 +6,14 @@ from marshmallow import ValidationError
 
 from src import db
 from src.database.models import Actor
+from src.resources.auth import token_required
 from src.schemas.actors import ActorSchema
 
 
 class ActorListApi(Resource):
     actor_schema = ActorSchema()
 
+    @token_required
     def get(self, id=None):
         if not id:
             actors = db.session.query(Actor).all()
@@ -21,6 +23,7 @@ class ActorListApi(Resource):
             return f'Sorry, but actor with id: {id} not found', 404
         return self.actor_schema.dump(actor), 200
 
+    @token_required
     def post(self):
         try:
             actor = self.actor_schema.load(request.json, session=db.session)
@@ -30,6 +33,7 @@ class ActorListApi(Resource):
         db.session.commit()
         return self.actor_schema.dump(actor), 201
 
+    @token_required
     def put(self, id):
         actor = db.session.query(Actor).filter_by(id=id).first()
         if not actor:
@@ -42,6 +46,7 @@ class ActorListApi(Resource):
         db.session.commit()
         return self.actor_schema.dump(actor), 200
 
+    @token_required
     def delete(self, id):
         if not id:
             return {'message': 'Please send id actor'}, 400
