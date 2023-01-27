@@ -12,6 +12,8 @@ flask-swagger-ui = "*"
 marshmallow-sqlalchemy = "*"
 marshmallow = "==3.19.0"
 pyjwt = "*"
+requests = "*"
+bs4 = "*"
 
 [dev-packages]
 

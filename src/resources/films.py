@@ -9,6 +9,7 @@ from src import db
 from src.database.models import Film
 from src.resources.auth import token_required
 from src.schemas.films import FilmSchema
+from src.services.film_service import FilmService
 
 
 class FilmListApi(Resource):
@@ -17,11 +18,11 @@ class FilmListApi(Resource):
     @token_required
     def get(self, uuid=None):
         if not uuid:
-            films = db.session.query(Film).options(
+            films = FilmService.fetch_all_films(db.session).options(
                 joinedload(Film.actors)
             ).all()
             return self.film_schema.dump(films, many=True), 200
-        film = db.session.query(Film).filter_by(uuid=uuid).first()
+        film = FilmService.fetch_film_by_uuid(db.session, uuid)
         if not film:
             return f'Sorry, but film with id: {uuid} not found', 404
         return self.film_schema.dump(film), 200
@@ -38,7 +39,7 @@ class FilmListApi(Resource):
 
     @token_required
     def put(self, uuid=None):
-        film = db.session.query(Film).filter_by(uuid=uuid).first()
+        film = FilmService.fetch_film_by_uuid(db.session, uuid)
         if not film:
             return "", 404
         try:
@@ -88,7 +89,7 @@ class FilmListApi(Resource):
     def delete(self, uuid=None):
         if not uuid:
             return {'message': 'Please send id film'}, 400
-        film = db.session.query(Film).filter_by(uuid=uuid).first()
+        film = FilmService.fetch_film_by_uuid(db.session, uuid)
         if not film:
             return f'Sorry, but film with id {uuid} not found', 404
         db.session.delete(film)
